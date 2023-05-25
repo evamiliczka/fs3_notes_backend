@@ -1,9 +1,12 @@
 const express = require('express');
+const cors = require ('cors');
+
 /*express, which this time is a 
 function that is used to create an express application stored in the app variable: */
 const app = express();
 
 app.use(express.json());
+app.use(cors);
 
 let notes = [
     {
@@ -81,7 +84,7 @@ app.delete('/api/notes/:id', (request, response) => {
   response.status(204).end();
 })
 
-const PORT =3001; // process.env.PORT || 
+const PORT = process.env.PORT || 3001;   
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
   }

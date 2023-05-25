@@ -6,6 +6,9 @@ function that is used to create an express application stored in the app variabl
 const app = express();
 
 app.use(express.json());
+/* To make express show static content, the page index.html and the JavaScript, etc., 
+it fetches, we need a built-in middleware from express called static.*/
+app.use(express.static('build'));
 app.use(cors);
 
 let notes = [
@@ -35,7 +38,7 @@ app.get('/', (request, response) => {
 
 /* Handle HTTP GET to /api/notes */
 app.get('/api/notes', (request, response) => {
- // console.log('request',request);
+  console.log('request',request);
     response.json(notes)
 })
 

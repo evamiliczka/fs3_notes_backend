@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require ('cors');
+//const cors = require ('cors');
 
 /*express, which this time is a 
 function that is used to create an express application stored in the app variable: */
@@ -9,7 +9,7 @@ app.use(express.json());
 /* To make express show static content, the page index.html and the JavaScript, etc., 
 it fetches, we need a built-in middleware from express called static.*/
 app.use(express.static('build'));
-app.use(cors);
+//app.use(cors);
 
 let notes = [
     {

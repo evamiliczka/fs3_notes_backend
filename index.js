@@ -38,7 +38,7 @@ app.get('/', (request, response) => {
 
 /* Handle HTTP GET to /api/notes */
 app.get('/api/notes', (request, response) => {
-  console.log('request',request);
+ // console.log('request',request);
     response.json(notes)
 })
 

@@ -18,23 +18,7 @@ it fetches, we need a built-in middleware from express called static.*/
 app.use(express.static('build'));
 app.use(cors());
 
-let notes = [
-    {
-      id: 1,
-      content: "HTML is easy",
-      important: true
-    },
-    {
-      id: 2,
-      content: "Browser can execute only JavaScript",
-      important: false
-    },
-    {
-      id: 3,
-      content: "GET and POST are the most important methods of HTTP protocol",
-      important: true
-    }
-  ]
+
 
   /* Next, we define two routes to the application. The first one defines an event 
   handler that is used to handle HTTP GET requests made to the application's /, i.e. root:*/
@@ -55,39 +39,31 @@ app.get('/api/notes', (request, response) => {
 // SOMETHING is an arbitrary string
 /// http://localhost/api/notes/1  ====> request.params = {id: '1'}
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id); //change string to number
-  const note = notes.find(n => n.id === id);
-  if (note)
-    response.json(note);
-  else
-    response.status(404).end(); 
+  Note.findById(request.params.id)
+    .then(note => {
+      response.json(note);
+    })
 })
 
-const generateId = () => {
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
-    : 0;
-  return maxId + 1;
-}
 
 app.post('/api/notes', (request, response) => {
+  //request je vstupom, tu programujem odpoved servera na REQUEST
   const body = request.body; //a JSON string
 
   //Ak novo pridana poznamka nema content, cize naco ju pridavat
-  if (!body.content) 
+  if (body.content === undefined) 
     return response.status(400).json({error: 'content missing'})
   //else
   
-  const newNote = {
+  const newNote = new Note({
     content : body.content,
     important : body.important || false,
-    id : generateId()
-  }
-
-
-  notes = notes.concat(newNote);
-  response.json(newNote);
- 
+  })
+  
+  newNote.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    }) 
 })
 
 app.delete('/api/notes/:id', (request, response) => {

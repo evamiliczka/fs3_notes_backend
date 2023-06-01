@@ -1,5 +1,12 @@
+/* the environment variables from the ".env" file are available globally,
+ before the code from the other modules is imported. */
+require('dotenv').config();
+//console.log('Process env: ', process.env);
+
 const express = require('express');
 const cors = require ('cors');
+const Note = require('./models/note');
+
 
 /*express, which this time is a 
 function that is used to create an express application stored in the app variable: */
@@ -38,8 +45,10 @@ app.get('/', (request, response) => {
 
 /* Handle HTTP GET to /api/notes */
 app.get('/api/notes', (request, response) => {
- // console.log('request',request);
-    response.json(notes)
+    Note.find({})
+      .then(notes => {
+        response.json(notes)
+      })
 })
 
 // Handle HTTP GET to /api/notes/SOMETHING
@@ -87,7 +96,7 @@ app.delete('/api/notes/:id', (request, response) => {
   response.status(204).end();
 })
 
-const PORT = process.env.PORT || 3001;   
+const PORT = process.env.PORT; // We are using dotenv and the port is defined in the .env file,... || 3001;   
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
   }

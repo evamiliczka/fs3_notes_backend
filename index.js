@@ -1,24 +1,44 @@
-/* the environment variables from the ".env" file are available globally,
- before the code from the other modules is imported. */
-require('dotenv').config();
-//console.log('Process env: ', process.env);
+
 
 const express = require('express');
-const cors = require ('cors');
-const Note = require('./models/note');
-
-
 /*express, which this time is a 
 function that is used to create an express application stored in the app variable: */
 const app = express();
+const cors = require ('cors');
+/* the environment variables from the ".env" file are available globally,
+ before the code from the other modules is imported. */
+ require('dotenv').config();
+ //console.log('Process env: ', process.env);
 
+const Note = require('./models/note');
+
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
+
+/*--------------errors  ------------*/
+const errorHandler = (error, request, response, next) => {
+  console.error('Error handler: ', error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+  next(error)
+}
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 /* To make express show static content, the page index.html and the JavaScript, etc., 
 it fetches, we need a built-in middleware from express called static.*/
 app.use(express.static('build'));
-app.use(cors());
-
-
 
   /* Next, we define two routes to the application. The first one defines an event 
   handler that is used to handle HTTP GET requests made to the application's /, i.e. root:*/
@@ -38,12 +58,22 @@ app.get('/api/notes', (request, response) => {
 // Handle HTTP GET to /api/notes/SOMETHING
 // SOMETHING is an arbitrary string
 /// http://localhost/api/notes/1  ====> request.params = {id: '1'}
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   Note.findById(request.params.id)
     .then(note => {
-      response.json(note);
+      if (note){
+        response.json(note);
+      } else {
+        console.log('Note not found error');
+        response.status(404).end();
+      }
     })
+    .catch(error => {
+      console.log('Caught error: ', error);
+      debugger;
+      next(error)})
 })
+
 
 
 app.post('/api/notes', (request, response) => {
@@ -66,11 +96,31 @@ app.post('/api/notes', (request, response) => {
     }) 
 })
 
-app.delete('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id);
-  notes = notes.filter(n => n.id !== id);
-  response.status(204).end();
+app.delete('/api/notes/:id', (request, response, next) => {
+  Note.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end();
+    })
+    .catch(error => next(error))  
 })
+
+app.put('/api/notes/:id', (request, response, next) => 
+  {
+    const body = request.body;
+    const note = {
+      content : body.content,
+      important: body.important,
+    }
+    Note.findByIdAndUpdate(request.params.id, note, {new : true})
+      .then(updatedNote => {
+        response.json(updatedNote)
+      })
+      .catch(error => next(error))
+  })
+
+
+app.use(unknownEndpoint) //no routes or middleware are called after this, with the exception of errorHandler 
+app.use(errorHandler)
 
 const PORT = process.env.PORT; // We are using dotenv and the port is defined in the .env file,... || 3001;   
 app.listen(PORT, () => {

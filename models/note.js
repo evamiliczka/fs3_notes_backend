@@ -7,7 +7,6 @@ const url = process.env.MONGODB_URI
 
 console.log('URL is', url)
 
-console.log('connecting to ',url);
 
 mongoose.connect(url)
     .then(result => {

@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 /*express, which this time is a 
 function that is used to create an express application stored in the app variable: */
@@ -20,18 +18,24 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-/*--------------errors  ------------*/
-const errorHandler = (error, request, response, next) => {
-  console.error('Error handler: ', error.message)
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } 
-  next(error)
-}
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
+
+/*--------------error  ------------*/
+const errorHandler = (error, request, response, next) => {
+  console.error('Error handler: ', error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+  else 
+    if (error.name === 'ValidationError'){
+      return response.status(400).json({error: error.message})
+    }
+  next(error)
+}
+
 
 app.use(cors());
 app.use(express.json());
@@ -76,7 +80,7 @@ app.get('/api/notes/:id', (request, response, next) => {
 
 
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   //request je vstupom, tu programujem odpoved servera na REQUEST
   const body = request.body; //a JSON string
 
@@ -94,6 +98,7 @@ app.post('/api/notes', (request, response) => {
     .then(savedNote => {
       response.json(savedNote)
     }) 
+    .catch(error => next(error))
 })
 
 app.delete('/api/notes/:id', (request, response, next) => {
@@ -106,12 +111,15 @@ app.delete('/api/notes/:id', (request, response, next) => {
 
 app.put('/api/notes/:id', (request, response, next) => 
   {
-    const body = request.body;
-    const note = {
-      content : body.content,
-      important: body.important,
-    }
-    Note.findByIdAndUpdate(request.params.id, note, {new : true})
+    console.log('Request.body is ', request.body);
+    const {content, important } = request.body;
+    console.log('By setting   const {content, important } = request.body; we get:');
+    console.log('content is ', content);
+    console.log('important is ', important);
+
+    Note.findByIdAndUpdate(request.params.id, {content, important}, 
+        {new : true, runValidators : true, context : 'query'}
+    )
       .then(updatedNote => {
         response.json(updatedNote)
       })

@@ -1,0 +1,21 @@
+GET http://localhost:3001/api/notes
+###
+GET http://localhost:3001/api/notes/64770631df0e46adb2c2227
+###
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "Yet",
+    "important":false
+}
+###
+PUT http://localhost:3001/api/notes/64787108c7b6bd757fafb131
+Content-Type: application/json
+
+{
+    "content": "yet",
+    "important":false
+}
+###
+DELETE http://localhost:3001/api/notes/64770631df0e46adb2c22279

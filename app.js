@@ -10,6 +10,7 @@ const {
   unknownEndpoint,
   errorHandler,
 } = require('./utils/middleware');
+
 const { info, error } = require('./utils/logger');
 
 mongoose.set('strictQuery', false);

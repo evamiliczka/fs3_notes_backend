@@ -5,7 +5,7 @@ const app = express();
 const cors = require ('cors');
 /* the environment variables from the ".env" file are available globally,
  before the code from the other modules is imported. */
- require('dotenv').config();
+require('dotenv').config();
  //console.log('Process env: ', process.env);
 
 const Note = require('./models/note');

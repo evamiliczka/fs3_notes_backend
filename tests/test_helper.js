@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const Note = require('../models/note');
 
 const initialNotes = [
@@ -11,7 +12,16 @@ const initialNotes = [
   },
 ];
 
-const notesInDb = async () => {
+
+const nonExistingId = async () => {
+  const note = new Note({content : 'willremovethissoon'});
+  await note.save();
+  await note.deleteOne();
+
+  return note._id.toString();
+} 
+
+const allNotesInDb = async () => {
   const notes = await Note.find({});
   console.log(
     'notesInDb first note is',
@@ -24,5 +34,6 @@ const notesInDb = async () => {
 
 module.exports = {
   initialNotes,
-  notesInDb,
+  allNotesInDb,
+  nonExistingId,
 };

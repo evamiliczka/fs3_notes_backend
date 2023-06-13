@@ -54,7 +54,7 @@ test('a valid note can be added', async () => {
     .expect(201) // supertest
     .expect('Content-Type', /application\/json/);
 
-  const notesFinal = await helper.notesInDb();
+  const notesFinal = await helper.allNotesInDb();
   expect(notesFinal).toHaveLength(helper.initialNotes.length + 1);
 
   const contents = notesFinal.map(n => n.content);
@@ -81,7 +81,7 @@ test('a note without content CAN NOT be added', async () => {
     .expect(400) // supertest    
     .expect('Content-Type', /application\/json/);
 
-    const notesFinal = await helper.notesInDb();
+    const notesFinal = await helper.allNotesInDb();
     expect(notesFinal).toHaveLength(helper.initialNotes.length);
 })
 

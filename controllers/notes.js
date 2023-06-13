@@ -13,18 +13,15 @@ notesRouter.get('/', async (request, response) => {
 // Handle HTTP GET to /api/notes/SOMETHING
 // SOMETHING is an arbitrary string
 /// http://localhost/api/notes/1  ====> request.params = {id: '1'}
-notesRouter.get('/:id', async (request, response, next) => {
-    try{
-        const note = await Note.findById(request.params.id);
-        if (note) response.json(note);
-        else {
-            logger.error('Note not found error');
-            response.status(404).end();
-        }
-        } catch (exception) {
-        logger.error('Caught error: ', exception);
-        next(exception);
+notesRouter.get('/:id', async (request, response) => {
+    
+    const note = await Note.findById(request.params.id);
+    if (note) response.json(note);
+    else {
+        logger.error('Note not found error');
+        response.status(404).end();
     }
+
     /* Note.findById(request.params.id)
     .then((note) => {
         if (note) {
@@ -41,7 +38,7 @@ notesRouter.get('/:id', async (request, response, next) => {
 });
 
 // eslint-disable-next-line consistent-return
-notesRouter.post('/', async (request, response, next) => {
+notesRouter.post('/', async (request, response) => {
     // request je vstupom, tu programujem odpoved servera na REQUEST
     const { body } = request; // a JSON string
 
@@ -50,23 +47,16 @@ notesRouter.post('/', async (request, response, next) => {
         important: body.important || false,
       })
     
-    try {
-        const savedNote = await note.save();
-        response.status(201).json(savedNote);
-    } catch(exception) {
-        next(exception);
-    }
-
+ 
+    const savedNote = await note.save();
+    response.status(201).json(savedNote);
+  
     
 });
 
-notesRouter.delete('/:id', async (request, response, next) => {
-    try {
+notesRouter.delete('/:id', async (request, response) => {
         await Note.findByIdAndRemove(request.params.id);
         response.status(204).end();
-    } catch (exception) {
-        next(exception);
-    }
 
 
   /*  Note.findByIdAndRemove(request.params.id)
@@ -76,23 +66,21 @@ notesRouter.delete('/:id', async (request, response, next) => {
     .catch((error) => next(error)); */
 });
 
-notesRouter.put('/:id', async (request, response, next) => {
+notesRouter.put('/:id', async (request, response) => {
     logger.info('Request.body is ', request.body);
     const { content, important } = request.body;
     logger.info('By setting   const {content, important } = request.body; we get:');
     logger.info('content is ', content);
     logger.info('important is ', important);
 
-    try {
-        const updatedNote = await Note.findByIdAndUpdate(
-            request.params.id,
-            { content, important },
-            { new: true, runValidators: true, context: 'query'}
-        );
-        response.status(204).json(updatedNote)
-    } catch(exception) {
-        next(exception);
-    }
+
+    const updatedNote = await Note.findByIdAndUpdate(
+        request.params.id,
+        { content, important },
+        { new: true, runValidators: true, context: 'query'}
+    );
+    response.status(204).json(updatedNote)
+  
 
 /*    Note.findByIdAndUpdate(
         request.params.id,

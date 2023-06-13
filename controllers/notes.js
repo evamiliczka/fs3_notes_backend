@@ -4,12 +4,11 @@ const logger = require('../utils/logger')
 
     
 /* Handle HTTP GET to /api/notes */
-notesRouter.get('/', (request, response) => {
-    Note.find({})
-    .then((notes) => {
-        response.json(notes);
-    });
-});
+notesRouter.get('/', async (request, response) => {
+    const notes = await Note.find({});
+    response.json(notes);
+    }
+);
 
 // Handle HTTP GET to /api/notes/SOMETHING
 // SOMETHING is an arbitrary string
@@ -42,7 +41,7 @@ notesRouter.post('/', (request, response, next) => {
     
     note.save()
     .then(savedNote => {
-        response.json(savedNote)
+        response.status(201).json(savedNote)
     })
     .catch(error => next(error))
 });

@@ -30,7 +30,7 @@ notesRouter.get('/:id', (request, response, next) => {
 });
 
 // eslint-disable-next-line consistent-return
-notesRouter.post('/', (request, response, next) => {
+notesRouter.post('/', async (request, response, next) => {
     // request je vstupom, tu programujem odpoved servera na REQUEST
     const { body } = request; // a JSON string
 
@@ -39,30 +39,51 @@ notesRouter.post('/', (request, response, next) => {
         important: body.important || false,
       })
     
-    note.save()
-    .then(savedNote => {
-        response.status(201).json(savedNote)
-    })
-    .catch(error => next(error))
+    try {
+        const savedNote = await note.save();
+        response.status(201).json(savedNote);
+    } catch(exception) {
+        next(exception);
+    }
+
+    
 });
 
-notesRouter.delete('/:id', (request, response, next) => {
-    Note.findByIdAndRemove(request.params.id)
-    // eslint-disable-next-line no-unused-vars
+notesRouter.delete('/:id', async (request, response, next) => {
+    try{
+        await Note.findByIdAndRemove(request.params.id);
+        response.status(204).end();
+    } catch (exception) {
+        next(exception);
+    }
+
+
+  /*  Note.findByIdAndRemove(request.params.id)
     .then((result) => {
         response.status(204).end();
     })
-    .catch((error) => next(error));
+    .catch((error) => next(error)); */
 });
 
-notesRouter.put('/:id', (request, response, next) => {
+notesRouter.put('/:id', async (request, response, next) => {
     logger.info('Request.body is ', request.body);
     const { content, important } = request.body;
     logger.info('By setting   const {content, important } = request.body; we get:');
     logger.info('content is ', content);
     logger.info('important is ', important);
 
-    Note.findByIdAndUpdate(
+    try {
+        const updatedNote = await Note.findByIdAndUpdate(
+            request.params.id,
+            { content, important },
+            { new: true, runValidators: true, context: 'query'}
+        );
+        response.status(204).json(updatedNote)
+    } catch(exception) {
+        next(exception);
+    }
+
+/*    Note.findByIdAndUpdate(
         request.params.id,
         { content, important },
         { new: true, runValidators: true, context: 'query' },
@@ -70,7 +91,7 @@ notesRouter.put('/:id', (request, response, next) => {
     .then((updatedNote) => {
         response.json(updatedNote);
     })
-    .catch((error) => next(error));
+    .catch((error) => next(error)); */
 });
 
 module.exports = notesRouter;

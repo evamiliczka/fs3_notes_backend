@@ -13,8 +13,19 @@ notesRouter.get('/', async (request, response) => {
 // Handle HTTP GET to /api/notes/SOMETHING
 // SOMETHING is an arbitrary string
 /// http://localhost/api/notes/1  ====> request.params = {id: '1'}
-notesRouter.get('/:id', (request, response, next) => {
-    Note.findById(request.params.id)
+notesRouter.get('/:id', async (request, response, next) => {
+    try{
+        const note = await Note.findById(request.params.id);
+        if (note) response.json(note);
+        else {
+            logger.error('Note not found error');
+            response.status(404).end();
+        }
+        } catch (exception) {
+        logger.error('Caught error: ', exception);
+        next(exception);
+    }
+    /* Note.findById(request.params.id)
     .then((note) => {
         if (note) {
         response.json(note);
@@ -26,7 +37,7 @@ notesRouter.get('/:id', (request, response, next) => {
     .catch((error) => {
         logger.error('Caught error: ', error);
         next(error);
-    });
+    }); */
 });
 
 // eslint-disable-next-line consistent-return
@@ -50,7 +61,7 @@ notesRouter.post('/', async (request, response, next) => {
 });
 
 notesRouter.delete('/:id', async (request, response, next) => {
-    try{
+    try {
         await Note.findByIdAndRemove(request.params.id);
         response.status(204).end();
     } catch (exception) {

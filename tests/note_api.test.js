@@ -12,17 +12,27 @@ const api = supertest(app);
 
 beforeEach(async () => {
     await Note.deleteMany({}); // reset DB
+    console.log('cleared');
+    const notesObject = helper.initialNotes.map(note => new Note(note));
+    // we create an array of promises
+    const promiseArray = notesObject.map(note => note.save())
+    // array is transformed to a single promise
+    await Promise.all(promiseArray);
+    // we can access results 
+    // const results = await Promise.all(promiseArray)
+    console.log('done');
 
-    let noteObject = new Note(helper.initialNotes[0]);
-    await noteObject.save();
-
-    noteObject = new Note(helper.initialNotes[1]);
-    await noteObject.save();
+    /* If we want PARTICULAR ORDER
+    for (let note of helper.initialNotes) {
+    let noteObject = new Note(note)
+    await noteObject.save()
+  } */
 }, 100000)
 
 
 
 test('notes are retunrned as JSON', async () => {
+    console.log('entered test');
     await api
         .get('/api/notes')
         .expect(200) // using supertest
@@ -93,13 +103,13 @@ test('a valid note can be updated', async () => {
 test('a specific note can be viewed (1st note in this test)', async () => {
   const notesAtStart = await helper.allNotesInDb(); // maped with JSON belonging to noteSchema
   const noteToView = notesAtStart[0];
-  console.log('noteToView is ', noteToView);
+  // console.log('noteToView is ', noteToView);
   const result = await api
     .get(`/api/notes/${noteToView.id}`) // the app uses JSON belonging to noteSchema
     .expect(200)
     .expect('Content-Type', /application\/json/);
 
-  console.log(' body is ', result.body);
+ //  console.log(' body is ', result.body);
   expect(result.body).toEqual(noteToView);
 }
 )

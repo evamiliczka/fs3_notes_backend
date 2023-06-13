@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const helper = require('./test_helper');
 
 mongoose.set("bufferTimeoutMS", 30000);
 const app = require('../app');
@@ -7,22 +8,14 @@ const Note = require('../models/note');
 
 const api = supertest(app);
 
-const initialNotes =  [
-    {
-      content: 'HTML is easy',
-      important: false,
-    },
-    {
-      content: 'Browser can execute only JavaScript',
-      important: true,
-    },
-  ]
 
 beforeEach(async () => {
-    await Note.deleteMany({});
-    let noteObject = new Note(initialNotes[0]);
+    await Note.deleteMany({}); // reset DB
+
+    let noteObject = new Note(helper.initialNotes[0]);
     await noteObject.save();
-    noteObject = new Note(initialNotes[1]);
+
+    noteObject = new Note(helper.initialNotes[1]);
     await noteObject.save();
 }, 100000)
 
@@ -38,7 +31,7 @@ test('notes are retunrned as JSON', async () => {
 test('all notes are returned', async () => {
     const response = await api.get('/api/notes');
 
-    expect(response.body).toHaveLength(initialNotes.length);  // JEST expect method
+    expect(response.body).toHaveLength(helper.initialNotes.length);  // JEST expect method
 },100000)
 
 test('a specific note is within returned notes', async () => {
@@ -61,12 +54,20 @@ test('a valid note can be added', async () => {
     .expect(201) // supertest
     .expect('Content-Type', /application\/json/);
 
-  const response = await api.get('/api/notes');
+  const notesFinal = await helper.notesInDb();
+  expect(notesFinal).toHaveLength(helper.initialNotes.length + 1);
+
+  const contents = notesFinal.map(n => n.content);
+  expect(contents).toContain('async/await simplifies making async calls'); 
+  /* const response = await api.get('/api/notes');
+  console.log('test response body is ', response.body,' of type ', typeof response.body);
 
   const contents = response.body.map(r => r.content);
+  console.log('test contents is ', contents,' of type ', typeof contents); 
 
-  expect(response.body).toHaveLength(initialNotes.length + 1);
-  expect(contents).toContain('async/await simplifies making async calls')
+
+  expect(response.body).toHaveLength(helper.initialNotes.length + 1);
+  expect(contents).toContain('async/await simplifies making async calls') */
 })
 
 test('a note without content CAN NOT be added', async () => {
@@ -80,9 +81,8 @@ test('a note without content CAN NOT be added', async () => {
     .expect(400) // supertest    
     .expect('Content-Type', /application\/json/);
 
-  const response = await api.get('/api/notes');
-
-  expect(response.body).toHaveLength(initialNotes.length);
+    const notesFinal = await helper.notesInDb();
+    expect(notesFinal).toHaveLength(helper.initialNotes.length);
 })
 
 afterAll(async () => {

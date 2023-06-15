@@ -55,7 +55,7 @@ describe('when there are initially some notes saved', () => {
   }, 100000);
 });
 
-describe('viewing a specific note ', () => {
+describe.only('viewing a specific note ', () => {
   test('succeeds with a valid id', async () => {
     const notesAtStart = await helper.allNotesInDb(); // maped with JSON belonging to noteSchema
     const noteToView = notesAtStart[0];

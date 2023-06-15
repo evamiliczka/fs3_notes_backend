@@ -36,7 +36,7 @@ app.use(requestLogger);
 
 app.use('/api/notes', notesRouter);
 
-app.use(unknownEndpoint); // no routes or middleware are called after this, with the exception of errorHandler
+app.use(unknownEndpoint); // no routes or middleware must be called after this!!!!!!!!!, with the exception of errorHandler
 app.use(errorHandler);
 
 module.exports = app;

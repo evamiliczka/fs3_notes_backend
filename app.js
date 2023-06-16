@@ -7,6 +7,8 @@ require('express-async-errors');
 
 const app = express();
 const notesRouter = require('./controllers/notes');
+const usersRouter = require('./controllers/users');
+
 const {
   requestLogger,
   unknownEndpoint,
@@ -35,6 +37,8 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use('/api/notes', notesRouter);
+
+app.use('/api/users', usersRouter)
 
 app.use(unknownEndpoint); // no routes or middleware must be called after this!!!!!!!!!, with the exception of errorHandler
 app.use(errorHandler);

@@ -1,5 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 const Note = require('../models/note');
+const User = require('../models/user');
+
 
 const initialNotes = [
   {
@@ -30,8 +32,14 @@ const allNotesInDb = async () => {
   return notes.map((note) => note.toJSON()); // our JSON transform
 };
 
+const allUsersInDb = async () => {
+  const allUsers = await User.find({});
+  return allUsers.map(u => u.toJSON());
+}
+
 module.exports = {
   initialNotes,
   allNotesInDb,
+  allUsersInDb,
   nonExistingId,
 };

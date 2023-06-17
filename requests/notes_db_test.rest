@@ -7,7 +7,8 @@ Content-Type: application/json
 
 {
     "content": "Yet another note",
-    "important":false
+    "important":false,
+    "userId": "648c67577402aa84600b1800"
 }
 ###
 PUT http://localhost:3001/api/notes/64785c8547808cec9244dcaa

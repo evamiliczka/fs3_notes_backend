@@ -1,11 +1,13 @@
+/* eslint-disable no-underscore-dangle */
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
-const logger = require('../utils/logger')
+const User = require('../models/user');
+const { error } = require('../utils/logger')
 
     
 /* Handle HTTP GET to /api/notes */
 notesRouter.get('/', async (request, response) => {
-    const notes = await Note.find({});
+    const notes = await Note.find({}).populate('userId', { username: 1, name: 1});
     response.json(notes);
     }
 );
@@ -18,7 +20,7 @@ notesRouter.get('/:id', async (request, response) => {
 
     if (note) response.json(note);
     else {
-        logger.error('Note not found error');
+        error('Note not found error');
         response.status(404).end();
     }
 });
@@ -27,17 +29,28 @@ notesRouter.get('/:id', async (request, response) => {
 notesRouter.post('/', async (request, response) => {
     // request je vstupom, tu programujem odpoved servera na REQUEST
     const { body } = request; // a JSON string
+    console.log('Going to post a note',body, typeof body);
+
+    const user = await User.findById(body.userId);
+    // info('Created by user ', user, typeof user);
 
     const note = new Note({
         content: body.content,
         important: body.important || false,
+        userId: user.id
       })
     
+    // info('Going to post this note, aready a model ', note, typeof note);
  
-    const savedNote = await note.save();
-    response.status(201).json(savedNote);
-  
-    
+     const savedNote = await note.save();
+    // info('This note is saved to DB ', savedNote, typeof savedNote);
+    user.notes = user.notes.concat(savedNote._id);
+    // info('The user has saved notes ', user.notes, typeof user.notes);
+    await user.save();
+
+
+ 
+    response.status(201).json(savedNote); // json data is sent to client
 });
 
 notesRouter.delete('/:id', async (request, response) => {

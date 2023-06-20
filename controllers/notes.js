@@ -1,10 +1,20 @@
 /* eslint-disable no-underscore-dangle */
 const notesRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Note = require('../models/note');
 const User = require('../models/user');
 const { error } = require('../utils/logger')
 
     
+const getTokenFrom = request => {
+    const authorization = request.get('authorization');
+    if (authorization && authorization.startsWith('bearer ')){
+        return authorization.replace('bearer ','');
+    }
+    return null;
+}
+
+
 /* Handle HTTP GET to /api/notes */
 notesRouter.get('/', async (request, response) => {
     const notes = await Note.find({}).populate('userId', { username: 1, name: 1});
@@ -29,9 +39,19 @@ notesRouter.get('/:id', async (request, response) => {
 notesRouter.post('/', async (request, response) => {
     // request je vstupom, tu programujem odpoved servera na REQUEST
     const { body } = request; // a JSON string
-    console.log('Going to post a note',body, typeof body);
+    // console.log('Going to post a note',body, typeof body);
 
-    const user = await User.findById(body.userId);
+    // jwt.verify checks the token, decodes it and returns the object
+    // the token is based on
+    // exception: JsonWebTokenError
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id){
+        return response.status(401).json({ error: 'invalid token' });
+    }
+
+    const user = await User.findById(decodedToken.id);
+
+    // const user = await User.findById(body.userId);
     // info('Created by user ', user, typeof user);
 
     const note = new Note({

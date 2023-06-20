@@ -4,11 +4,11 @@ GET http://localhost:3001/api/notes/64785c8547808cec9244dcaa
 ###
 POST http://localhost:3001/api/notes
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvaG4iLCJpZCI6IjY0OGM2NzY4NzQwMmFhODQ2MDBiMTgwNCIsImlhdCI6MTY4NzI1OTYxNH0.ymGLMem5hpXJ7H-U_5IN1U2JWRbgthYMmQdDK_emjGY
 
 {
-    "content": "Yet another note",
-    "important":false,
-    "userId": "648c67577402aa84600b1800"
+    "content": "My note",
+    "important":false
 }
 ###
 PUT http://localhost:3001/api/notes/64785c8547808cec9244dcaa
